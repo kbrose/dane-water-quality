@@ -2,9 +2,12 @@ from pathlib import Path
 import logging
 
 import pandas as pd
+from scipy.stats.mstats import gmean
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+DATA_FOLDER = Path(__file__).parents[1] / 'data'
 
 # Map all observed site values to a standard list
 SITE_MAP = {
@@ -25,7 +28,7 @@ SITE_MAP = {
     'Marshall': 'marshall',
     'Mendota Co Park': 'mendota_co_park',
     'Stewart Lake Beach': 'stewart',
-    'Yahara Mouth': 'yahara_mouth',
+    'Yahara Mouth': 'yahara',
     'Goodland Park': 'goodland',
     'Vilas-Left': 'vilas',
     'Vilas-Right': 'vilas',
@@ -164,7 +167,7 @@ def load():
     Load the transformed dataframe.
     """
     df = pd.read_excel(
-        Path(__file__).parents[1] / 'data/raw/PHMDC Beach Data 2010-2018.xlsx'
+        DATA_FOLDER / 'raw/PHMDC Beach Data 2010-2018.xlsx'
     )
     df.columns = df.columns.str.lower()
     df['site'] = pd.Series(SITE_MAP)[df['site']].values
@@ -176,5 +179,12 @@ def load():
         .str.replace(',', '')  # things like "12,345"
         .astype(float)
     )
-    df.sort_values(by=['collectdate', 'site'])
+    df = (
+        df
+        .sort_values(by=['collectdate', 'site'])
+        .groupby(['collectdate', 'site'])
+        .apply(lambda x: x['result'].mean()) # gmean(x['result'].dropna()))
+        .reset_index()
+        .pivot(index='collectdate', columns='site', values=0)
+    )
     return df
