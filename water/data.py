@@ -167,7 +167,7 @@ def load():
     Load the transformed dataframe.
     """
     df = pd.read_excel(
-        DATA_FOLDER / 'raw/PHMDC Beach Data 2010-2018.xlsx'
+        DATA_FOLDER / 'raw' / 'PHMDC Beach Data 2010-2018.xlsx'
     )
     df.columns = df.columns.str.lower()
     df['site'] = pd.Series(SITE_MAP)[df['site']].values
@@ -181,9 +181,10 @@ def load():
     )
     df = (
         df
+        .dropna(subset=['result'])
         .sort_values(by=['collectdate', 'site'])
         .groupby(['collectdate', 'site'])
-        .apply(lambda x: gmean(x['result'].dropna()))
+        .apply(lambda x: gmean(x['result']))
         .reset_index()
         .pivot(index='collectdate', columns='site', values=0)
     )
