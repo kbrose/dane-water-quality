@@ -183,7 +183,7 @@ def load():
         df
         .sort_values(by=['collectdate', 'site'])
         .groupby(['collectdate', 'site'])
-        .apply(lambda x: x['result'].mean()) # gmean(x['result'].dropna()))
+        .apply(lambda x: gmean(x['result'].dropna()))
         .reset_index()
         .pivot(index='collectdate', columns='site', values=0)
     )
