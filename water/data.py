@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 DATA_FOLDER = Path(__file__).parents[1] / 'data'
 
 
-def load():
+def load() -> pd.DataFrame:
     """
     Load the transformed dataframe.
     """
